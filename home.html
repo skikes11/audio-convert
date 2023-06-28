@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.1.2/dist/axios.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      .audioTarget {
+        margin-top: 30px;
+      }
+      .mw-200 {
+        max-width: 200px;
+      }
+      .mgt-85 {
+        margin-top: 85px;
+      }
+      .mgt-200 {
+        margin-top: 200px;
+      }
+      .pd-20 {
+        padding: 20px;
+      }
+      .upload-btn-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+      }
+
+      .btn {
+        border: 2px solid gray;
+        color: gray;
+        background-color: white;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      .upload-btn-wrapper input[type="file"] {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+      }
+    </style>
+
+    <h1 style="text-align: center">Audio Convert</h1>
+    <div class="d-flex justify-content-evenly mgt-85">
+      <div class="mw-200">
+        <div class="audioSource">
+          <!-- <h5>Upload Source Audio</h5> -->
+          <div class="upload-btn-wrapper">
+            <button class="btn">Upload source file</button>
+            <input type="file" id="uploadAudioSource" />
+            <audio id="audioSource" controls>
+              <source src="./audio/source.mp3" id="src" />
+            </audio>
+          </div>
+          <!-- <input type="file" id="uploadAudioSource" />
+          <audio id="audioSource" controls>
+            <source src="./audio/source.mp3" id="src" />
+          </audio> -->
+        </div>
+
+        <div class="audioTarget">
+          <!-- <h5>Upload Target Audio</h5> -->
+          <!-- <input type="file" id="uploadAudioTarget" />
+          <audio id="audioTarget" controls>
+            <source src="./audio/target.mp3" id="src2" />
+          </audio> -->
+          <div class="upload-btn-wrapper">
+            <button class="btn">Upload target file</button>
+            <input type="file" id="uploadAudioTarget" />
+            <audio id="audioTarget" controls>
+              <source src="./audio/target.mp3" id="src2" />
+            </audio>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onclick="handleButtonConvert()"
+          class="btn btn-primary btn-lg mgt-85"
+        >
+          Convert
+        </button>
+      </div>
+
+      <div class="audioConverted">
+        <h5>Converted Audio</h5>
+        <audio id="audioConverted" controls>
+          <source src="" id="src3" />
+        </audio>
+      </div>
+    </div>
+  </body>
+  <script>
+    // console.log("1")
+    // if (!$(src).attr("src")) {
+    //   document.getElementById("audioSource").style.visibility = "hidden";
+    // }
+
+    // if (!$(src).attr("src2")) {
+    //   document.getElementById("audioTarget").style.visibility = "hidden"; // check if audio source to preview
+    // }
+
+    // if (!$(src).attr("src3")) {
+    //   document.getElementById("audioConverted").style.visibility = "hidden"; // set audio preview hidden
+    // }
+
+    function postAudioFileToServer(api, file) {
+      var formData = new FormData();
+      formData.append("audioFile", file);
+      axios.post(api, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+
+    function callPythonCode(url) {
+      axios
+        .post(url)
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+
+    function handleButtonConvert() {
+      callPythonCode("http://localhost:3000/touch");
+    }
+
+    function handleFilesAudioSource(event) {
+      // handle file audio source when upload file
+      var files = event.target.files;
+      // $("#src").attr("src", URL.createObjectURL(files[0]));
+      // if ($(src).attr("src")) {
+      //   document.getElementById("audioSource").style.visibility = "visible";
+      // }
+      // document.getElementById("audioSource").load();
+      postAudioFileToServer("http://localhost:3000/upload/source", files[0]);
+    }
+
+    function handleFilesAudioTarget(event) {
+      var files = event.target.files;
+      // $("#src2").attr("src", URL.createObjectURL(files[0]));
+      // if ($(src2).attr("src")) {
+      //   document.getElementById("audioTarget").style.visibility = "visible"; // set audio preview visible
+      // }
+      // document.getElementById("audioTarget").load();
+      postAudioFileToServer("http://localhost:3000/upload/target", files[0]);
+    }
+
+    document
+      .getElementById("uploadAudioSource")
+      .addEventListener("change", handleFilesAudioSource, false);
+    document
+      .getElementById("uploadAudioTarget")
+      .addEventListener("change", handleFilesAudioTarget, false);
+  </script>
+</html>
